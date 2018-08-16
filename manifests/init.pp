@@ -5,6 +5,13 @@
 class scientific_python {
 
   #####################################################
+  # anaconda
+  #####################################################
+  $anaconda_url = 'https://repo.anaconda.com/archive/Anaconda2-5.2.0-Linux-x86_64.sh'
+  $anaconda_file = 'Anaconda2-5.2.0-Linux-x86_64.sh'
+
+
+  #####################################################
   # create groups and users
   #####################################################
   $user = 'ops'
@@ -316,6 +323,29 @@ class scientific_python {
     name    => '/etc/puppet/modules/scientific_python/files/processing-0.39-py2.7-linux-x86_64.egg',
     ensure  => installed,
     require => Easy_install['python-pyhdf'],
+  }
+
+
+  #####################################################
+  # run install_anaconda.sh script in ops home
+  #####################################################
+
+  file { "/home/$user/install_anaconda.sh":
+    ensure  => present,
+    content => template('scientific_python/install_anaconda.sh'),
+    owner   => $user,
+    group   => $group,
+    mode    => 0755,
+    require => User[$user],
+  }
+
+  exec { "install-anaconda":
+    path    => ["/sbin", "/bin", "/usr/bin"],
+    cwd     => "/home/$user",
+    user   => $user,
+    group   => $group,
+    command => "/home/$user/install_anaconda.sh",
+    require => File["/home/$user/install_anaconda.sh"],
   }
 
 
